@@ -26,7 +26,7 @@ SDtEXt get_tEXt(char *path){
     return gTXt;
   }
 
-  if(strcmp(PMG_FHDR, buf)){
+  if(strcmp(buf, PMG_FHDR) != 0){
     gTXt.eMEs = ERR_NO_PNGH;
     return gTXt;
   }
@@ -37,7 +37,7 @@ SDtEXt get_tEXt(char *path){
     return gTXt;
   }
 
-  if(strcmp(PNG_IHDR, buf)){
+  if(strcmp(buf, PNG_IHDR) != 0){
     gTXt.eMEs = ERR_NO_IHDR;
     return gTXt;
   }
@@ -116,11 +116,11 @@ SDtEXt get_tEXt(char *path){
 
   /* Check tEXt identifier */
 
-  if(strcmp(SD_tEXt_Stable, gTXt.tEXt)){
+  if(strcmp(gTXt.tEXt, SD_tEXt_Stable) == 0){
     gTXt.made = SD_Made_Stable;
-  } else if(strcmp(SD_tEXt_Meitu1, gTXt.tEXt)){
+  } else if(strcmp(gTXt.tEXt, SD_tEXt_Meitu1) == 0){
     gTXt.made = SD_Made_Meitu1;
-  } else if(strcmp(SD_tEXt_Meitu2, gTXt.tEXt)){
+  } else if(strcmp( gTXt.tEXt, SD_tEXt_Meitu2) == 0){
     gTXt.made = SD_Made_Meitu2;
   } else{
     gTXt.eMEs = ERR_NO_tEXt;
@@ -142,8 +142,7 @@ SDtEXt get_tEXt(char *path){
   }
 
   /* Check Parameters of tEXt Chunk */
-  if(! strncmp(SD_tEXt_Param, gTXt.param, 11)){
-    printf("tEXt parameter check fail\n");
+  if(strncmp(gTXt.param, SD_tEXt_Param, 11) != 0){
     gTXt.eMEs = ERR_NO_PARA;
     return gTXt;
   }
@@ -165,11 +164,11 @@ int iTXt_dialog(int GTK_MESSAGE_TYPE, const char *msg){
 
   int result;
 
-  if(GTK_MESSAGE_TYPE != GTK_MESSAGE_INFO){
+  /*if(GTK_MESSAGE_TYPE != GTK_MESSAGE_INFO){
     fprintf(stderr, "%s: %s\n", APPNAME, msg);
   } else{
     fprintf(stdout, "%s: %s\n", APPNAME, msg);
-  }
+  }*/
 
   GtkWidget *iDlg = gtk_message_dialog_new(
     NULL,
@@ -201,8 +200,6 @@ int main(int argc, char *argv[]){
 
   int ret;
 
-  GtkWidget *iWin;
-
   gtk_init(&argc, &argv);
 
   if(argc <2){
@@ -210,7 +207,11 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
-  iTXt = get_tEXt(argv[1]);
+  if(strncmp(argv[1], "file://", 7) == 0){
+    iTXt = get_tEXt(argv[1]+7);
+  } else{
+    iTXt = get_tEXt(argv[1]);
+  }
 
   if(iTXt.eMEs != NULL){
     if(iTXt.param != NULL){ free(iTXt.param); }
