@@ -22,7 +22,7 @@ Version=1.0
 Type=Application  
 Name=sd-get-prompt  
 Comment=Get tEXt parametor  
-Exec=~/bin/sd-get-prompt %u  
+Exec=~/bin/sd-get-prompt %f  
 ServiceTypes=KonqPopupMenu/Plugin  
 MimeType=image/png  
 Icon=applications-graphics  
@@ -34,7 +34,7 @@ StartupNotify=true
 
 ## XFce
 
-1. Add right-click action for thunar.
+1. Add right-click action for thunar(sd-get-prompt %f)
 
 ## Others
 
