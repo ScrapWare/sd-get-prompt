@@ -11,7 +11,7 @@ How to use?
 ## KDE
 
 1. create .desktop file.
-2. kde/share/kde4/services/ServiceMenus/
+2. place to kde/share/kde4/services/ServiceMenus/
 
 ## XFce
 
