@@ -1,6 +1,6 @@
 # sd-get-prompt
 
-Easy display for Stable Diffusion iTXt Exif data. Anyone can copy and paste friom dialog.
+Easy display for Stable Diffusion iTXt Exif data. Anyone can copy and paste from GTK+ dialog.
 
 Sample picture is Japanese language but everybodは can understanding through SD(Stable Diffusion) icon picture on right click menu.
 
