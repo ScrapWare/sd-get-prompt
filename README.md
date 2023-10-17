@@ -1,6 +1,6 @@
 # sd-get-prompt
 
-Easy display for Stable Diffusion iTXt Exif data. Anyone can copy and paste from GTK+ dialog.
+Easy display for Stable Diffusion tEXt(Meitu iTXt) Exif data. Anyone can copy and paste from GTK+ dialog.
 
 Sample picture is Japanese language but everybodは can understanding through SD(Stable Diffusion) icon picture on right click menu.
 
@@ -40,4 +40,14 @@ StartupNotify=true
 
 for Other wm(window Manager) and file manager.
 
-1. Should be reading your file manager manpages.
+1. Should be reading your file manager manpages. May be could under run Linux Mint and other Cinnamon distribution and Gnome Nautilus, measure file manager too.
+
+##　Microsoft Windows
+
+GLib and GTK+ needed(CygWin).
+
+もうWindows自体立ち上げず、一応デュアルブート環境ですがVisualStudioも何も入っていないので、WinAPI経由ならダイアログ部分を変えて移植してください(小物だから楽)。
+
+もうWindowsは忘れました。
+
+MsgBoxは選択コピペ不可だったように思いますが、適当にフォームデザイナを使えば簡素なUIはすぐできます。
