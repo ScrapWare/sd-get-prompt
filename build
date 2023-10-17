@@ -1,0 +1,14 @@
+#!/bin/sh
+
+export GTK2I=`pkg-config --cflags gtk+-2.0`
+export GLIBI=`pkg-config --cflags glib-2.0`
+export GTK2L=`pkg-config --libs gtk+-2.0`
+export GLIBL=`pkg-config --libs glib-2.0`
+
+export CMD="gcc -Wdeprecated-declarations -I . $GTK2I $GLIBI sd-get-prompt.c $GTK2L $GLIBL -o sd-get-prompt"
+
+echo $CMD
+
+$CMD
+
+#strip sd-get-prompt
