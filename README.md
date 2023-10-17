@@ -1,6 +1,10 @@
 # sd-get-prompt
 
-Easy display for Stable Diffusion iTXt Exif data.
+Easy display for Stable Diffusion iTXt Exif data. Anyone can copy and paste friom dialog.
+
+Sample picture is Japanese language but everybodは can understanding through SD(Stable Diffusion) icon picture on right click menu.
+
+生成AI設定情報 → Creation AI Configuration Info.
 
 # Usage (Right Clickable)
 
@@ -24,7 +28,7 @@ Path=
 Terminal=false  
 StartupNotify=true  
 
-& apply KDE Dolphin service dir and good changes.
+& Apply to KDE Dolphin service dir and good changes.
 
 ## XFce
 
