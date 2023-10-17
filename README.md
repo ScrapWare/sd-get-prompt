@@ -2,7 +2,7 @@
 
 Easy display for Stable Diffusion iTXt Exif data.
 
-# Usage
+# Usage (Right Clickable)
 
 How to use?
 
@@ -11,8 +11,14 @@ How to use?
 ## KDE
 
 1. create .desktop file.
-2. place to kde/share/kde4/services/ServiceMenus/
+2. place to .kde/share/kde4/services/ServiceMenus/
 
 ## XFce
 
-1. Add action for thunar on XFce and other wm(window Manager) .
+1. Add right-click action for thunar.
+
+## Others
+
+for Other wm(window Manager) and file manager.
+
+1. Should be reading your file manager manpages.
