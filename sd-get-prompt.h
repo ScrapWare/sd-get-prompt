@@ -26,7 +26,7 @@
 #define ERR_NG_INFO "Invalid information text!\0"
 #define ERR_NG_NGTV "Invalid negative prompt!\0"
 
-#define SD_tEXt_Param "Parameters\0"
+#define SD_tEXt_Param "parameters\0"
 
 #define SD_tEXt_Stable "tEXt\0"
 #define SD_tEXt_Meitu1 "iTXt\0"
