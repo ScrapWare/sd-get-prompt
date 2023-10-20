@@ -45,7 +45,7 @@ typedef struct _ihdr{
   char filter;
   char interlace;
   int  ihdr_crc;
-}; ihdr, *pihdr;
+} ihdr, *pihdr;
 
 typedef struct _tEXtP{
   char  tEXt[5];
@@ -54,7 +54,7 @@ typedef struct _tEXtP{
   char *param;
   int   tEXt_crc;
   char *eMEs;
-}; tEXtP, *ptEXtP;
+} tEXtP, *ptEXtP;
 
 typedef struct _SDtEXt{
   /* IHDR */
