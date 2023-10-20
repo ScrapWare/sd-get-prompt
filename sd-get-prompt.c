@@ -22,28 +22,33 @@ SDtEXt get_tEXt(char *path){
 
   /* PNG Header */
   if(! fread(buf, 1, 8, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
 
   if(strcmp(buf, PMG_FHDR) != 0){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_PNGH;
     return gTXt;
   }
 
   /* IHDR Chunk */
   if(! fread(buf, 1, 8, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
 
   if(strcmp(buf, PNG_IHDR) != 0){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_IHDR;
     return gTXt;
   }
 
   /* Width IHDR Chunk */
   if(! fread(&i, 4, 1, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
@@ -52,6 +57,7 @@ SDtEXt get_tEXt(char *path){
 
   /* Height IHDR Chunk */
   if(! fread(&i, 4, 1, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
@@ -60,36 +66,42 @@ SDtEXt get_tEXt(char *path){
 
   /* Depth IHDR Chunk */
   if(! fread(&gTXt.depth, 1, 1, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
 
   /* Color IHDR Chunk */
   if(! fread(&gTXt.color, 1, 1, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
 
   /* Compression IHDR Chunk */
   if(! fread(&gTXt.compression, 1, 1, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
 
   /* Filter IHDR Chunk */
   if(! fread(&gTXt.filter, 1, 1, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
 
   /* Interlace IHDR Chunk */
   if(! fread(&gTXt.interlace, 1, 1, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
 
   /* CRC IHDR Chunk */
   if(! fread(&gTXt.ihdr_crc, 1, 4, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
@@ -102,6 +114,7 @@ SDtEXt get_tEXt(char *path){
 
   /* Size of tEXt Chunk */
   if(! fread(&i, 4, 1, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
@@ -110,6 +123,7 @@ SDtEXt get_tEXt(char *path){
 
   /* Identifier tEXt Chunk */
   if(! fread(&gTXt.tEXt, 1, 4, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
@@ -137,6 +151,7 @@ SDtEXt get_tEXt(char *path){
 
   /* Parameters of tEXt Chunk */
   if(! fread(gTXt.param, 1, gTXt.size, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
@@ -149,6 +164,7 @@ SDtEXt get_tEXt(char *path){
 
   /* CRC IHDR Chunk */
   if(! fread(&gTXt.tEXt_crc, 1, 4, fp)){
+    fclose(fp);
     gTXt.eMEs = ERR_NO_READ;
     return gTXt;
   }
@@ -162,15 +178,16 @@ SDtEXt get_tEXt(char *path){
 
 int iTXt_dialog(int GTK_MESSAGE_TYPE, const char *msg){
 
-  int result;
+  GtkClipboard *clip;
+     GtkWidget *iDlg;
 
-  /*if(GTK_MESSAGE_TYPE != GTK_MESSAGE_INFO){
+  if(GTK_MESSAGE_TYPE == GTK_MESSAGE_ERROR){
     fprintf(stderr, "%s: %s\n", APPNAME, msg);
   } else{
     fprintf(stdout, "%s: %s\n", APPNAME, msg);
-  }*/
+  }
 
-  GtkWidget *iDlg = gtk_message_dialog_new(
+  iDlg = gtk_message_dialog_new(
     NULL,
     GTK_DIALOG_MODAL,
     GTK_MESSAGE_TYPE,
@@ -178,27 +195,110 @@ int iTXt_dialog(int GTK_MESSAGE_TYPE, const char *msg){
     APPLABL
   );
 
+  gtk_window_set_skip_taskbar_hint(GTK_WINDOW(iDlg), 0);
+  gtk_window_set_position(GTK_WINDOW(iDlg), GTK_WIN_POS_CENTER);
   gtk_window_set_title(GTK_WINDOW(iDlg), APPNAME);
   gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(iDlg), msg);
-  result = gtk_dialog_run(GTK_DIALOG(iDlg));
+
+  gtk_dialog_run(GTK_DIALOG(iDlg));
+
+  clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+  gtk_clipboard_store(clip);
+
   gtk_widget_destroy(iDlg);
 
-  return result;
+  return 0;
 
 }
+
+char *join_args(int argc, char *argv[]){
+
+  char *argj;
+   int  argl = 0;
+   int  i;
+
+  /* Ignoring file:// */
+  if(strncmp(argv[1], "file://", 7) == 0){
+    argv[1] += 7;
+  }
+
+  for(i=1;i<argc;i++){
+    argl += strlen(argv[i]);
+  }
+
+  argj = (char*)malloc(sizeof(char)*(argl+argc+1));
+
+  if(argj == NULL) return argv[1];
+
+  strcpy(argj, argv[1]);
+
+  for(i=2;i<argc;i++){
+    strcat(argj, "\x20");
+    strcat(argj, argv[i]);
+  }
+
+  return argj;
+
+}
+
+unsigned char conv_hex(unsigned char chr){
+
+  unsigned char tmp;
+
+  if( chr >= '0' && chr <= '9'){
+    tmp = chr - '0';
+  } else if(chr >= 'A' && chr <= 'F'){
+    tmp = 10 + chr - 'A';
+  } else if(chr >= 'a' && chr <= 'f'){
+    tmp = 10 + chr - 'a';
+  } else { chr = 0; }
+
+  return tmp;
+
+}
+
+void decode_url_string(char *ustr){
+
+  unsigned char *tmp = (unsigned char*)ustr;
+  unsigned char chr[3];
+            int  len;
+
+  do {
+    if(*tmp == '%' && *(tmp+1) != '\0' && *(tmp+2) !='\0'
+      && ( *(tmp+1) >= '0' && *(tmp+1) <= '9' || *(tmp+1) >= 'A' && *(tmp+1) <= 'F' || *(tmp+1) >= 'a' && *(tmp+1) <= 'f' )
+      && ( *(tmp+2) >= '0' && *(tmp+2) <= '9' || *(tmp+2) >= 'A' && *(tmp+2) <= 'F' || *(tmp+2) >= 'a' && *(tmp+2) <= 'f' )
+      ){
+      chr[0] = conv_hex(*(tmp+1));
+      chr[1] = conv_hex(*(tmp+2));
+      chr[2] = (chr[0]*16) + chr[1];
+      len = strlen(tmp+3);
+      *tmp = (chr[2] == 0)? ' ' : chr[2];
+      memmove(tmp+1, tmp+3, len);
+      memcpy(tmp+(len+1), "\0", 1);
+    } else if(*tmp == '+'){
+      *tmp = ' ';
+    }
+  } while(*(tmp++) != '\0');
+
+}
+
 
 int main(int argc, char *argv[]){
 
   SDtEXt iTXt;
+
+  char *args;
 
   char *neg;
   char *inf;
   char *tmp;
   char *dsp;
 
-  int lens[3];
+  int ret = 0;
 
-  int ret;
+  int lens[4];
+
+  int i;
 
   gtk_init(&argc, &argv);
 
@@ -207,48 +307,60 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
-  if(strncmp(argv[1], "file://", 7) == 0){
-    iTXt = get_tEXt(argv[1]+7);
-  } else{
-    iTXt = get_tEXt(argv[1]);
-  }
+  args = join_args(argc, argv);
+  decode_url_string(args);
+  iTXt = get_tEXt(args);
+  free(args);
 
   if(iTXt.eMEs != NULL){
-    if(iTXt.param != NULL){ free(iTXt.param); }
+    if(iTXt.param != NULL) free(iTXt.param);
+    if(errno != 0) fprintf(stderr, "%s\n", strerror(errno));
     iTXt_dialog(GTK_MESSAGE_WARNING, iTXt.eMEs);
     return 1;
   }
 
   tmp = iTXt.param + 11;
 
+  if(strcmp(iTXt.tEXt, SD_tEXt_Meitu1) == 0 || strcmp(iTXt.tEXt, SD_tEXt_Meitu2) == 0){
+    tmp += 4;
+  }
+
   /* Search Info */
   if((inf = strstr(tmp, STR_INF)) == NULL){
-    if(iTXt.param != NULL){ free(iTXt.param); }
+    free(iTXt.param);
     iTXt_dialog(GTK_MESSAGE_WARNING, ERR_NG_INFO);
     return 1;
   }
 
   *inf = 0; inf++;
-  lens[2] = strlen(inf);
+  lens[3] = strlen(inf);
 
   /* Search Negative */
   if((neg = strstr(tmp, STR_NEG)) == NULL){
-    if(iTXt.param != NULL){ free(iTXt.param); }
+    free(iTXt.param);
     iTXt_dialog(GTK_MESSAGE_WARNING, ERR_NG_NGTV);
     return 1;
   }
 
   *neg = 0; neg++;
-  lens[1] = strlen(neg);
-
-  lens[0] = strlen(tmp);
+  lens[2] = strlen(neg);
+  lens[1] = strlen(tmp);
+  lens[0] = lens[1] + lens[3] + 2;
 
   /* Malloc */
-  dsp = (char*)malloc(sizeof(char)*(lens[0]+lens[2]+3));
+  dsp = (char*)malloc(sizeof(char)*(lens[0]+1));
+
+  if(dsp == NULL){
+    free(iTXt.param);
+    iTXt_dialog(GTK_MESSAGE_WARNING, ERR_NO_ALOC);
+    return 1;
+  }
+
   /* Copy */
-  strcpy(dsp, tmp);
-  strcat(dsp, "\n\n");
-  strcat(dsp, inf);
+  memcpy(dsp, tmp, lens[1]);
+  memcpy(dsp + lens[1], "\n\n", 2);
+  memcpy(dsp + lens[1] + 2, inf, lens[3]);
+  memcpy(dsp + lens[0], "\0", 1);
 
   free(iTXt.param);
 
