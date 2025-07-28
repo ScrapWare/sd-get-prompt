@@ -12,3 +12,5 @@ echo $CMD
 $CMD
 
 #strip sd-get-prompt
+
+cp -f sd-get-prompt /disk/sdxl/bin/sd-get-prompt

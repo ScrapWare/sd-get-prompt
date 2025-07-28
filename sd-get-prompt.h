@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <byteswap.h>
+#include <errno.h>
 
 #include <gtk/gtk.h>
 
@@ -27,14 +28,20 @@
 #define ERR_NG_NGTV "Invalid negative prompt!\0"
 
 #define SD_tEXt_Param "parameters\0"
+#define SD_tEXt_TsArt "generation_data\0"
 
 #define SD_tEXt_Stable "tEXt\0"
 #define SD_tEXt_Meitu1 "iTXt\0"
 #define SD_tEXt_Meitu2 "rTXt\0"
-
 #define SD_Made_Stable "SD tEXt\0"
 #define SD_Made_Meitu1 "Meitu iTXt\0"
 #define SD_Made_Meitu2 "Meitu rTXt\0"
+#define SD_Made_TsrArt "TensorArt JSON\0"
+
+typedef struct _sHash{
+  char *key;
+  char *value;
+} shash, *pshash;
 
 typedef struct _ihdr{
   int  width;
