@@ -2,15 +2,12 @@
 
 SDtEXt get_tEXt(char *path){
 
-  SDtEXt  gTXt = {
+  SDtEXt gTXt = {
     0, 0, 0, 0, 0, 0, 0, 0, "\0\0\0\0\0", "\0", 0, NULL, 0, NULL
   };
-
-  char  buf[9] = "\0\0\0\0\0\0\0\0\0";
-
-  FILE *fp;
-
-  int i;
+  char   buf[9] = "\0\0\0\0\0\0\0\0\0";
+  FILE  *fp;
+   int   i;
 
   /* Open */
   fp = fopen(path, "rb");
@@ -129,12 +126,11 @@ SDtEXt get_tEXt(char *path){
   }
 
   /* Check tEXt identifier */
-
   if(strcmp(gTXt.tEXt, SD_tEXt_Stable) == 0){
     gTXt.made = SD_Made_Stable;
   } else if(strcmp(gTXt.tEXt, SD_tEXt_Meitu1) == 0){
     gTXt.made = SD_Made_Meitu1;
-  } else if(strcmp( gTXt.tEXt, SD_tEXt_Meitu2) == 0){
+  } else if(strcmp(gTXt.tEXt, SD_tEXt_Meitu2) == 0){
     gTXt.made = SD_Made_Meitu2;
   } else{
     gTXt.eMEs = ERR_NO_tEXt;
@@ -287,106 +283,140 @@ void decode_url_string(char *ustr){
 
 }
 
-void JSONdecode(char *buff, char *text, int slen){
-  int i, j, k, l, f;
-  int p = 0;
-  /* start point */
+void FakeJSONdecode(char *buff, char *text, int slen){
+  char tkey[slen];
+  char tvar[slen];
+   int i, j, k, f;
+   int l = 0;
+   int p = 0;
+   int t = 0;
+   int v = 0;
+  /* Init */
+  buff[p] = '\0';
+  /* start point '{' */
   if(text[0] == '\x7b'){
       text++;
   }
-  l=0;
-  /* find \x22 */
   for(i=0;i<slen;i++){
-    /* Ends */
+    /* end point '}' */
     if(text[i] == '\x7d'){
-      buff[p] = '\0';
       return;
     }
-    /* Looped */
-    if(l == 1){
-      l=0;
-      //fprintf(stderr, "[%s]\n", text+i);
-    }
-    /* Keys */
+    /* Start Keys '"' */
     if(text[i] == '\x22' || text[i] == '\x27'){
       f = text[i];
-      /* Start Keys */
+      /* Search End Keys '"' */
       for(j=i+1;j<slen;j++){
-        /* Key Ends */
+        /* Founded End Keys */
         if(l == 1){
-          fprintf(stderr, "[L1:\\x%X(%c)]\n", text[j], text[j]);
-          fprintf(stderr, "%s", "\n\n");
+          //fprintf(stderr, "[LOOP:\\x%X(%c)]\n\n", text[j], text[j]);
           i=j;
+          l=0;
           break;
+        /* Key Ends '":' */
         } else if(text[j] == f && text[j+1] == '\x3a'){
-          buff[p++] = '\x3a';
-          buff[p++] = '\x0d';
-          buff[p++] = '\x09';
-          buff[p] = '\0';
-          f = text[j+2];
-          fprintf(stderr, "[FIND:\\x%X(%c)]\n", f, f);
-          if(f == '\x22'){ f = '\x22'; j+=3; }
-          else if(f == '\x5b'){ f = '\x5d'; j+=3; }
-          else if(f == '\x7b'){ f = '\x7d'; j+=3; }
-          else{ f = '\x2c'; j+=2; }
-          fprintf(stderr, "[SIGN:\\x%X(%c)]\n", f, f);
+          /* Finded */
+          //fprintf(stderr, "[FIND:\\x%X(%c)]\n", f, f);
+          /* Tags */
+          tkey[t++] = '\0';
+          /* strcat */
+          strcat(buff, tkey);
+          strcat(buff, ": ");
+          p+=t+2; /* Pointer + Temporary Pointer */
+          t=0; /* Reset Temporary Pointer */
+          /* skip ":(\x3a)" */
+          j+=2;
+          /* skip space */
+          while(text[j] == '\x20'){ j++; }
+          /* new period */
+          f = text[j];
+          /* "" */
+          if(f == '\x22'){ f = '\x22'; j+=1; }
+          /* '' */
+          else if(f == '\x27'){ f = '\x27'; j+=1; }
+          /* [ ~ ] */
+          else if(f == '\x5b'){ f = '\x5d'; strcat(buff, "["); p++; j+=1; }
+          /* { ~ } */
+          else if(f == '\x7b'){ f = '\x7d'; strcat(buff, "{"); p++; j+=1; }
+          /* int, float, bool, null */
+          else{ f = '\x2c'; }
+          /* Sign */
+          //fprintf(stderr, "[SIGN:\\x%X(%c)]\n", f, f);
           /* find \x22 \x5d \x7d */
           for(k=j;k<slen;k++){
             /* Values */
-            if(((f != '\x2c' && text[k] == f && text[k+1] == '\x2c') || (f == '\x2c' && text[k] == f))
-                || ((f != '\x2c' && text[k] == f && text[k+1] == '\x7d') || (f == '\x2c' && text[k] == '\x7d'))){
-              fprintf(stderr, "%s", "\n");
-              buff[p++] = '\x0d';
-              buff[p] = '\0';
-              if(f != '\x2c'){
-                if(text[k+1] == '\x7d'){ return; }
-                else{ j=k; }
+            if(
+              /* "" or '' or [ ~ ] or { ~ } */
+              (f != '\x2c' && text[k] == f && (text[k+1] == '\x2c' || text[k+1] == '\x7d'))
+              /* int, float, bool, null */
+              || f == '\x2c' && (text[k] == '\x2c' || text[k] == '\x7d')){
+              /* Finded */
+              //fprintf(stderr, "[FIND:\\x%X(%c)]\n", f, f);
+              /* Vars */
+              tvar[v++] = '\0';
+              /* strcpy */
+              strcat(buff, tvar);
+              p+=v+2; /* Pointer + Temporary Pointer */
+              v=0; /* Reset Temporary Pointer */
+              /* Goody Return */
+              if(strcmp(tkey, "prompt") == 0 || strcmp(tkey, "negativePrompt") == 0){
+                  strcat(buff, "\n\n");
+                  p+=2;
+              } else if(f == '\x5d'){
+                  strcat(buff, "], ");
+                  p+=3;
+              } else if(f == '\x7d'){
+                  strcat(buff, "}, ");
+                  p+=3;
+              } else {
+                  strcat(buff, ", ");
+                  p+=2; /* Pointer + Temporary Pointer */
+              }
+              /* Not EBI */
+              //fprintf(stderr, "[TAGS:%s]\n", tkey); /* Get Tags */
+              //fprintf(stderr, "[VARS:%s]\n", tvar); /* Get Vars */
+              //fprintf(stderr, "[BUFF: %s]\n", buff); /* Get Buff */
+              /* Last? */
+              if(f != '\x7d' && text[k] == '\x7d'){
+                return; /* Last? */
               } else{
-                if(text[k] == '\x7d'){ return; }
-                else{ j=k-1; }
+                  /* skip ",(\x2c)" */
+                  k += (f != '\x2c')? 1 : 0;
+                  /* j = k */
+                  j = k;
               }
               l=1;
               break;
-            } else if(text[k] == '\x20'){
-              fprintf(stderr, "%d", '\x20');
-              buff[p++] = '\x20';
             } else{
-              fprintf(stderr, "%c", text[k]);
-              buff[p++] = text[k];
+              tvar[v++] = text[k];
             }
           }
-        } else if(text[j] != '\x22'){
-          buff[p++] = text[j];
+        } else if(text[j] != '\x22' && text[j] != '\x27'){
+          tkey[t++] = text[j];
         }
       }
     } else if(text[i] != '\x20'){
       fprintf(stderr, "[%c(%d)]\n%s", text[i], text[i], buff);
-      iTXt_dialog(GTK_MESSAGE_ERROR, "すぺえすではない");
+      iTXt_dialog(GTK_MESSAGE_ERROR, "Maybe need this placed \\x20(SPACE)");
       exit(1);
     }
   }
 }
 
-/*
-tEXtgeneration_data.{"prompt":"(masterpiece), (best quality), (extremely detailed), (no humans), (completely features), 16k, samarkand blue mosque,","width":1024,"height":1024,"imageCount":1,"samplerName":"Euler a","steps":20,"cfgScale":6,"seed":"-1","clipSkip":2,"baseModel":{"label":"dev-fp8","type":"BASE_MODEL","modelId":"757279507095956705","modelFileId":"758377756002093254","modelFileName":"flux1-dev-fp8 (1)","baseModel":"FLUX.1","hash":"8E91B68084B53A7FC44ED2A3756D821E355AC1A7B6FE29BE760C1DB532F3D88A"},"sdVae":"animevae.pt","etaNoiseSeedDelta":31337,"sdxl":{},"ksamplerName":"euler_ancestral","schedule":"normal","guidance":3.5}
-*/
-
 int main(int argc, char *argv[]){
 
-  SDtEXt iTXt;
+  SDtEXt  iTXt;
 
-  char *args;
+    char *args;
 
-  char *neg;
-  char *inf;
-  char *tmp;
-  char *dsp;
+    char *neg;
+    char *inf;
+    char *tmp;
+    char *dsp;
 
-  int ret = 0;
-
-  int lens[4];
-
-  int i, j;
+     int  ret = 0;
+     int  lens[4];
+     int  i, j;
 
   gtk_init(&argc, &argv);
 
@@ -412,7 +442,7 @@ int main(int argc, char *argv[]){
 
     tmp = iTXt.param + 16;
 
-    lens[0] = strlen(tmp);
+    lens[0] = iTXt.size;
 
     /* Malloc */
     dsp = (char*)malloc(sizeof(char)*(lens[0]+1));
@@ -423,8 +453,9 @@ int main(int argc, char *argv[]){
       return 1;
     }
 
-    JSONdecode(dsp, tmp, lens[0]);
-    fprintf(stderr, "%s", dsp);
+    FakeJSONdecode(dsp, tmp, lens[0]);
+    fprintf(stderr, "%d(%d)\n", iTXt.size, strlen(dsp));
+    //fprintf(stderr, "%s\n\n", dsp);
     //memcpy(dsp, tmp, lens[0]);
     //memcpy(dsp + lens[0], "\0", 1);
 

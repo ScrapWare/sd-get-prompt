@@ -1,3 +1,6 @@
+[[sdgp (Python Library)](https://github.com/ScrapWareOrg/sdgp)]
+
+---
 # sd-get-prompt (Native C Version)
 
 Easy display for Stable Diffusion tEXt(Meitu iTXt) Exif data. Anyone can copy and paste from GTK+ dialog.
