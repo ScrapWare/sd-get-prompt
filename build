@@ -5,11 +5,13 @@ export GLIBI=`pkg-config --cflags glib-2.0`
 export GTK2L=`pkg-config --libs gtk+-2.0`
 export GLIBL=`pkg-config --libs glib-2.0`
 
-export CMD="gcc -Wdeprecated-declarations -I . $GTK2I $GLIBI sd-get-prompt.c $GTK2L $GLIBL -o sd-get-prompt"
-
+export CMD="gcc -O3 -Wdeprecated-declarations -I . $GTK2I $GLIBI decode.c sd-get-prompt.c $GTK2L $GLIBL -o sd-get-prompt"
 echo $CMD
-
 $CMD
+
+#export SUB="gcc -O3 -Wimplicit-function-declaration decode.c udec.c -o udec"
+#echo $SUB
+#$SUB
 
 #strip sd-get-prompt
 

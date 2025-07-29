@@ -242,167 +242,6 @@ char *join_args(int argc, char *argv[]){
 
 }
 
-unsigned char conv_hex(unsigned char chr){
-
-  unsigned char tmp;
-
-  if( chr >= '0' && chr <= '9'){
-    tmp = chr - '0';
-  } else if(chr >= 'A' && chr <= 'F'){
-    tmp = 10 + chr - 'A';
-  } else if(chr >= 'a' && chr <= 'f'){
-    tmp = 10 + chr - 'a';
-  } else { chr = 0; }
-
-  return tmp;
-
-}
-
-void decode_url_string(char *ustr){
-
-  unsigned char *tmp = (unsigned char*)ustr;
-  unsigned char chr[3];
-            int  len;
-
-  do {
-    if(*tmp == '%' && *(tmp+1) != '\0' && *(tmp+2) !='\0'
-      && ( *(tmp+1) >= '0' && *(tmp+1) <= '9' || *(tmp+1) >= 'A' && *(tmp+1) <= 'F' || *(tmp+1) >= 'a' && *(tmp+1) <= 'f' )
-      && ( *(tmp+2) >= '0' && *(tmp+2) <= '9' || *(tmp+2) >= 'A' && *(tmp+2) <= 'F' || *(tmp+2) >= 'a' && *(tmp+2) <= 'f' )
-      ){
-      chr[0] = conv_hex(*(tmp+1));
-      chr[1] = conv_hex(*(tmp+2));
-      chr[2] = (chr[0]*16) + chr[1];
-      len = strlen(tmp+3);
-      *tmp = (chr[2] == 0)? ' ' : chr[2];
-      memmove(tmp+1, tmp+3, len);
-      memcpy(tmp+(len+1), "\0", 1);
-    } else if(*tmp == '+'){
-      *tmp = ' ';
-    }
-  } while(*(tmp++) != '\0');
-
-}
-
-void FakeJSONdecode(char *buff, char *text, int slen){
-  char tkey[slen];
-  char tvar[slen];
-   int i, j, k, f;
-   int l = 0;
-   int p = 0;
-   int t = 0;
-   int v = 0;
-  /* Init */
-  buff[p] = '\0';
-  /* start point '{' */
-  if(text[0] == '\x7b'){
-      text++;
-  }
-  for(i=0;i<slen;i++){
-    /* end point '}' */
-    if(text[i] == '\x7d'){
-      return;
-    }
-    /* Start Keys '"' */
-    if(text[i] == '\x22' || text[i] == '\x27'){
-      f = text[i];
-      /* Search End Keys '"' */
-      for(j=i+1;j<slen;j++){
-        /* Founded End Keys */
-        if(l == 1){
-          //fprintf(stderr, "[LOOP:\\x%X(%c)]\n\n", text[j], text[j]);
-          i=j;
-          l=0;
-          break;
-        /* Key Ends '":' */
-        } else if(text[j] == f && text[j+1] == '\x3a'){
-          /* Finded */
-          //fprintf(stderr, "[FIND:\\x%X(%c)]\n", f, f);
-          /* Tags */
-          tkey[t++] = '\0';
-          /* strcat */
-          strcat(buff, tkey);
-          strcat(buff, ": ");
-          p+=t+2; /* Pointer + Temporary Pointer */
-          t=0; /* Reset Temporary Pointer */
-          /* skip ":(\x3a)" */
-          j+=2;
-          /* skip space */
-          while(text[j] == '\x20'){ j++; }
-          /* new period */
-          f = text[j];
-          /* "" */
-          if(f == '\x22'){ f = '\x22'; j+=1; }
-          /* '' */
-          else if(f == '\x27'){ f = '\x27'; j+=1; }
-          /* [ ~ ] */
-          else if(f == '\x5b'){ f = '\x5d'; strcat(buff, "["); p++; j+=1; }
-          /* { ~ } */
-          else if(f == '\x7b'){ f = '\x7d'; strcat(buff, "{"); p++; j+=1; }
-          /* int, float, bool, null */
-          else{ f = '\x2c'; }
-          /* Sign */
-          //fprintf(stderr, "[SIGN:\\x%X(%c)]\n", f, f);
-          /* find \x22 \x5d \x7d */
-          for(k=j;k<slen;k++){
-            /* Values */
-            if(
-              /* "" or '' or [ ~ ] or { ~ } */
-              (f != '\x2c' && text[k] == f && (text[k+1] == '\x2c' || text[k+1] == '\x7d'))
-              /* int, float, bool, null */
-              || f == '\x2c' && (text[k] == '\x2c' || text[k] == '\x7d')){
-              /* Finded */
-              //fprintf(stderr, "[FIND:\\x%X(%c)]\n", f, f);
-              /* Vars */
-              tvar[v++] = '\0';
-              /* strcpy */
-              strcat(buff, tvar);
-              p+=v+2; /* Pointer + Temporary Pointer */
-              v=0; /* Reset Temporary Pointer */
-              /* Goody Return */
-              if(strcmp(tkey, "prompt") == 0 || strcmp(tkey, "negativePrompt") == 0){
-                  strcat(buff, "\n\n");
-                  p+=2;
-              } else if(f == '\x5d'){
-                  strcat(buff, "], ");
-                  p+=3;
-              } else if(f == '\x7d'){
-                  strcat(buff, "}, ");
-                  p+=3;
-              } else {
-                  strcat(buff, ", ");
-                  p+=2; /* Pointer + Temporary Pointer */
-              }
-              /* Not EBI */
-              //fprintf(stderr, "[TAGS:%s]\n", tkey); /* Get Tags */
-              //fprintf(stderr, "[VARS:%s]\n", tvar); /* Get Vars */
-              //fprintf(stderr, "[BUFF: %s]\n", buff); /* Get Buff */
-              /* Last? */
-              if(f != '\x7d' && text[k] == '\x7d'){
-                return; /* Last? */
-              } else{
-                  /* skip ",(\x2c)" */
-                  k += (f != '\x2c')? 1 : 0;
-                  /* j = k */
-                  j = k;
-              }
-              l=1;
-              break;
-            } else{
-              tvar[v++] = text[k];
-            }
-          }
-        } else if(text[j] != '\x22' && text[j] != '\x27'){
-          tkey[t++] = text[j];
-        }
-      }
-    } else if(text[i] != '\x20'){
-      fprintf(stderr, "[%c(%d)]\n%s", text[i], text[i], buff);
-      iTXt_dialog(GTK_MESSAGE_ERROR, "Maybe need this placed \\x20(SPACE)");
-      exit(1);
-    }
-  }
-}
-
 int main(int argc, char *argv[]){
 
   SDtEXt  iTXt;
@@ -453,11 +292,11 @@ int main(int argc, char *argv[]){
       return 1;
     }
 
-    FakeJSONdecode(dsp, tmp, lens[0]);
-    fprintf(stderr, "%d(%d)\n", iTXt.size, strlen(dsp));
-    //fprintf(stderr, "%s\n\n", dsp);
-    //memcpy(dsp, tmp, lens[0]);
-    //memcpy(dsp + lens[0], "\0", 1);
+    if(FakeJSONdecode(dsp, tmp, lens[0]) == 0){
+      free(dsp);
+      iTXt_dialog(GTK_MESSAGE_WARNING, ERR_NO_DECS);
+      return 1;
+    }
 
   /* Others (WebUI, Meitu...) */
   } else{

@@ -23,6 +23,7 @@
 #define ERR_NO_IHDR "Invalid IHDR chunk!\0"
 #define ERR_NO_tEXt "Not a tEXt chunk!\0"
 #define ERR_NO_PARA "Not a Stable Diffusion Parameters!\0"
+#define ERR_NO_DECS "Could not decode JSON(Tensor.Art)!\0"
 
 #define ERR_NG_INFO "Invalid information text!\0"
 #define ERR_NG_NGTV "Invalid negative prompt!\0"
@@ -37,11 +38,6 @@
 #define SD_Made_Meitu1 "Meitu iTXt\0"
 #define SD_Made_Meitu2 "Meitu rTXt\0"
 #define SD_Made_TsrArt "TensorArt JSON\0"
-
-typedef struct _sHash{
-  char *key;
-  char *value;
-} shash, *pshash;
 
 typedef struct _ihdr{
   int  width;
