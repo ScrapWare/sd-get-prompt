@@ -1,4 +1,4 @@
-[[Installation(Recommended)](#Installation)] | [[sdgp (Python Library)](https://github.com/ScrapWareOrg/sdgp)] | [sdgp(PyPI)](https://github.com/ScrapWareOrg/sdgp)]
+[[Installation(Recommended)](#Installation)] | [[sdgp (Python Library)](https://github.com/ScrapWareOrg/sdgp)] | [sdgp(PyPI)](https://pypi.org/project/sdgp/#description)]
 
 ---
 # sd-get-prompt (Native C Version)
