@@ -179,8 +179,18 @@ SDtEXt get_tEXt(char *path){
 
 int iTXt_dialog(int GTK_MESSAGE_TYPE, const char *msg){
 
+  #if GTK_MAJOR_VERSION >= 4
+  GdkClipboard *clip;
+  #else
   GtkClipboard *clip;
+  #endif
      GtkWidget *iDlg;
+           int  rslt;
+
+  #if GTK_MAJOR_VERSION >= 3
+       GtkWidget *area;
+           GList *children, *l;
+  #endif
 
   if(GTK_MESSAGE_TYPE == GTK_MESSAGE_ERROR){
     fprintf(stderr, "%s: %s\n", APPNAME, msg);
@@ -197,18 +207,42 @@ int iTXt_dialog(int GTK_MESSAGE_TYPE, const char *msg){
   );
 
   gtk_window_set_skip_taskbar_hint(GTK_WINDOW(iDlg), 0);
+  #if GTK_MAJOR_VERSION >= 4
+  gtk_window_set_position(GTK_WINDOW(iDlg), 1);
+  #else
   gtk_window_set_position(GTK_WINDOW(iDlg), GTK_WIN_POS_CENTER);
+  #endif
   gtk_window_set_title(GTK_WINDOW(iDlg), APPNAME);
   gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(iDlg), msg);
 
-  gtk_dialog_run(GTK_DIALOG(iDlg));
+  #if GTK_MAJOR_VERSION >= 3
+  area = gtk_message_dialog_get_message_area(GTK_MESSAGE_DIALOG(iDlg));
+  children = gtk_container_get_children(GTK_CONTAINER(area));
 
+  for(l = children; l != NULL; l = g_list_next(l)){
+    GtkWidget *child = GTK_WIDGET(l->data);
+    if(GTK_IS_LABEL(child)){
+      gtk_label_set_selectable(GTK_LABEL(child), TRUE);
+      /* if want to target only the first GtkLabel found, break here; */
+      // break;
+    }
+  }
+  // GListは解放する必要がある
+  g_list_free(children);
+  #endif
+
+  rslt = gtk_dialog_run(GTK_DIALOG(iDlg));
+
+  #if GTK_MAJOR_VERSION >= 4
+  clip = gtk_clipboard_get(GDK_TYPE_CLIPBOARD);
+  #else
   clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+  #endif
   gtk_clipboard_store(clip);
 
   gtk_widget_destroy(iDlg);
 
-  return 0;
+  return rslt;
 
 }
 
@@ -257,7 +291,11 @@ int main(int argc, char *argv[]){
      int  lens[4];
      int  i, j;
 
+  #if GTK_MAJOR_VERSION >= 4
+  gtk_init();
+  #else
   gtk_init(&argc, &argv);
+  #endif
 
   if(argc <2){
     iTXt_dialog(GTK_MESSAGE_ERROR, ERR_NO_ARGC);

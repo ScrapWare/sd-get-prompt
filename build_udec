@@ -1,0 +1,5 @@
+#!/bin/sh
+
+export SUB="gcc -O3 -Wimplicit-function-declaration decode.c udec.c -o udec"
+echo $SUB
+$SUB

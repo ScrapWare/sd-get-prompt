@@ -1,0 +1,10 @@
+#!/bin/sh
+
+export GTK3I=`pkg-config --cflags gtk+-3.0`
+export GLIBI=`pkg-config --cflags glib-2.0`
+export GTK3L=`pkg-config --libs gtk+-3.0`
+export GLIBL=`pkg-config --libs glib-2.0`
+
+export CMD="gcc -O3 -Wdeprecated-declarations -I . $GTK3I $GLIBI decode.c sd-get-prompt.c $GTK3L $GLIBL -o sd-get-prompt3"
+echo $CMD
+$CMD

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+export GTK4I=`pkg-config --cflags gtk4`
+export GLIBI=`pkg-config --cflags glib-2.0`
+export GTK4L=`pkg-config --libs gtk4`
+export GLIBL=`pkg-config --libs glib-2.0`
+
+export CMD="gcc -O3 -Wdeprecated-declarations -I . -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED $GTK4I $GLIBI decode.c sd-get-prompt.c $GTK4L $GLIBL -o sd-get-prompt4"
+echo $CMD
+$CMD
